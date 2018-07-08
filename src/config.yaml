@@ -86,3 +86,39 @@ Tasmota_devicelist:
   ipaddresses:
     - '192.168.1.36'
     - '192.168.1.35'
+
+commands:
+  magic_mirror:
+    name: 'magic mirror'
+    actions:
+      show: 'afficher'
+      hide: 'cacher'
+      power_off: 'éteindre'
+      reboot: 'reboot'
+      restart: 'redémarrer'
+      display_on: 'allumer l''écran'
+      display_off: 'éteindre l''écran'
+      brightness: 'luminosité'
+      hide_all: 'cacher tout'
+      show_all: 'afficher tout'
+    modules:
+      weather:
+        name: 'météo'
+
+messages:
+  magic_mirror:
+    name: 'magic mirror'
+    commands:
+      generic:
+        show: 'Affiche'
+        hide: 'Cache'
+        module: 'Module'
+        power_off: 'Extinction'
+        reboot: 'Reboot'
+        restart: 'Redémarre'
+        display_on: 'Allume l''écran'
+        display_off: 'Eteindre l''écran'
+        hide_all: 'Cache tout'
+        show_all: 'Affiche tout'
+    modules:
+      weather: 'Météo'
