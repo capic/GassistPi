@@ -58,12 +58,10 @@ import sys
 import signal
 from threading import Thread
 
-
 try:
     FileNotFoundError
 except NameError:
     FileNotFoundError = IOError
-
 
 WARNING_NOT_REGISTERED = """
     This device is not registered. This means you will not be able to use
@@ -75,95 +73,93 @@ WARNING_NOT_REGISTERED = """
 
 logging.basicConfig(filename='/tmp/GassistPi.log', level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
+# Login with default kodi/kodi credentials
+# kodi = Kodi("http://localhost:8080/jsonrpc")
 
-
-#Login with default kodi/kodi credentials
-#kodi = Kodi("http://localhost:8080/jsonrpc")
-
-#Login with custom credentials
+# Login with custom credentials
 # Kodi("http://IP-ADDRESS-OF-KODI:8080/jsonrpc", "username", "password")
-kodiurl=("http://"+str(configuration['Kodi']['ip'])+":"+str(configuration['Kodi']['port'])+"/jsonrpc")
+kodiurl = ("http://" + str(configuration['Kodi']['ip']) + ":" + str(configuration['Kodi']['port']) + "/jsonrpc")
 kodi = Kodi(kodiurl, configuration['Kodi']['username'], configuration['Kodi']['password'])
-
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-#Indicator Pins
+# Indicator Pins
 GPIO.setup(25, GPIO.OUT)
 GPIO.setup(5, GPIO.OUT)
 GPIO.setup(6, GPIO.OUT)
 GPIO.output(5, GPIO.LOW)
 GPIO.output(6, GPIO.LOW)
-led=GPIO.PWM(25,1)
+led = GPIO.PWM(25, 1)
 led.start(0)
 
-#commands
-commands=configuration['commands']
+# commands
+commands = configuration['commands']
 
-#messages
-messages=configuration['messages']
+# messages
+messages = configuration['messages']
 
+# Sonoff-Tasmota Declarations
+# Make sure that the device name assigned here does not overlap any of your smart device names in the google home app
+tasmota_devicelist = configuration['Tasmota_devicelist']['friendly-names']
+tasmota_deviceip = configuration['Tasmota_devicelist']['ipaddresses']
 
-#Sonoff-Tasmota Declarations
-#Make sure that the device name assigned here does not overlap any of your smart device names in the google home app
-tasmota_devicelist=configuration['Tasmota_devicelist']['friendly-names']
-tasmota_deviceip=configuration['Tasmota_devicelist']['ipaddresses']
+# Magic Mirror Remote Control Declarations
+mmmip = configuration['Mmmip']
 
-#Magic Mirror Remote Control Declarations
-mmmip=configuration['Mmmip']
 
 # Check if VLC is paused
 def checkvlcpaused():
-    state=vlcplayer.state()
-    if str(state)=="State.Paused":
-        currentstate=True
+    state = vlcplayer.state()
+    if str(state) == "State.Paused":
+        currentstate = True
     else:
-        currentstate=False
+        currentstate = False
     return currentstate
 
 
-
-#Function to control Sonoff Tasmota Devices
-def tasmota_control(phrase,devname,devip):
+# Function to control Sonoff Tasmota Devices
+def tasmota_control(phrase, devname, devip):
     try:
         if 'on' in phrase:
-            rq=requests.head("http://"+devip+"/cm?cmnd=Power%20on")
-            say("Tunring on "+devname)
+            rq = requests.head("http://" + devip + "/cm?cmnd=Power%20on")
+            say("Tunring on " + devname)
         elif 'off' in phrase:
-            rq=requests.head("http://"+devip+"/cm?cmnd=Power%20off")
-            say("Tunring off "+devname)
+            rq = requests.head("http://" + devip + "/cm?cmnd=Power%20off")
+            say("Tunring off " + devname)
     except requests.exceptions.ConnectionError:
         say("Device not online")
 
-#Check if custom wakeword has been enabled
-if configuration['Custom_wakeword']['status']=='Enabled':
-    custom_wakeword=True
-else:
-    custom_wakeword=False
 
-models=configuration['Custom_wakeword']['models']
+# Check if custom wakeword has been enabled
+if configuration['Custom_wakeword']['status'] == 'Enabled':
+    custom_wakeword = True
+else:
+    custom_wakeword = False
+
+models = configuration['Custom_wakeword']['models']
+
 
 class Myassistant():
 
     def __init__(self):
-        self.interrupted=False
-        self.can_start_conversation=False
-        self.assistant=None
-        self.sensitivity = [0.5]*len(models)
-        self.callbacks = [self.detected]*len(models)
+        self.interrupted = False
+        self.can_start_conversation = False
+        self.assistant = None
+        self.sensitivity = [0.5] * len(models)
+        self.callbacks = [self.detected] * len(models)
         self.detector = snowboydecoder.HotwordDetector(models, sensitivity=self.sensitivity)
         self.t1 = Thread(target=self.start_detector)
 
-    def signal_handler(self,signal, frame):
+    def signal_handler(self, signal, frame):
         self.interrupted = True
 
-    def interrupt_callback(self,):
+    def interrupt_callback(self, ):
         return self.interrupted
 
-    def process_device_actions(self,event, device_id):
+    def process_device_actions(self, event, device_id):
         if 'inputs' in event.args:
             for i in event.args['inputs']:
                 if i['intent'] == 'action.devices.EXECUTE':
@@ -177,8 +173,7 @@ class Myassistant():
                                         else:
                                             yield e['command'], None
 
-
-    def process_event(self,event):
+    def process_event(self, event):
         """Pretty prints events.
         Prints all events that occur with two spaces between each new
         conversation and a single space between turns of a conversation.
@@ -191,69 +186,69 @@ class Myassistant():
             if custom_wakeword:
                 self.t1.start()
         if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
-            subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Fb.wav"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            #Uncomment the following after starting the Kodi
-            #status=mutevolstatus()
-            #vollevel=status[1]
-            #with open('/home/pi/.volume.json', 'w') as f:
-                   #json.dump(vollevel, f)
-            #kodi.Application.SetVolume({"volume": 0})
-            GPIO.output(5,GPIO.HIGH)
+            subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Fb.wav"], stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # Uncomment the following after starting the Kodi
+            # status=mutevolstatus()
+            # vollevel=status[1]
+            # with open('/home/pi/.volume.json', 'w') as f:
+            # json.dump(vollevel, f)
+            # kodi.Application.SetVolume({"volume": 0})
+            GPIO.output(5, GPIO.HIGH)
             led.ChangeDutyCycle(100)
             if vlcplayer.is_vlc_playing():
                 if os.path.isfile("/home/pi/.mediavolume.json"):
                     vlcplayer.set_vlc_volume(15)
                 else:
-                    currentvolume=vlcplayer.get_vlc_volume()
+                    currentvolume = vlcplayer.get_vlc_volume()
                     print(currentvolume)
                     with open('/home/pi/.mediavolume.json', 'w') as vol:
-                       json.dump(currentvolume, vol)
+                        json.dump(currentvolume, vol)
                     vlcplayer.set_vlc_volume(15)
             print()
 
         if event.type == EventType.ON_CONVERSATION_TURN_TIMEOUT:
-          GPIO.output(5,GPIO.LOW)
-          GPIO.output(6,GPIO.LOW)
-          led.ChangeDutyCycle(0)
-            #Uncomment the following after starting the Kodi
-            #with open('/home/pi/.volume.json', 'r') as f:
-                   #vollevel = json.load(f)
-                   #kodi.Application.SetVolume({"volume": vollevel})
-          if vlcplayer.is_vlc_playing():
-              with open('/home/pi/.mediavolume.json', 'r') as vol:
-                  oldvolume = json.load(vol)
-              vlcplayer.set_vlc_volume(int(oldvolume))
-
+            GPIO.output(5, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            led.ChangeDutyCycle(0)
+            # Uncomment the following after starting the Kodi
+            # with open('/home/pi/.volume.json', 'r') as f:
+            # vollevel = json.load(f)
+            # kodi.Application.SetVolume({"volume": vollevel})
+            if vlcplayer.is_vlc_playing():
+                with open('/home/pi/.mediavolume.json', 'r') as vol:
+                    oldvolume = json.load(vol)
+                vlcplayer.set_vlc_volume(int(oldvolume))
 
         if (event.type == EventType.ON_RESPONDING_STARTED and event.args and not event.args['is_error_response']):
-           GPIO.output(5,GPIO.LOW)
-           GPIO.output(6,GPIO.HIGH)
-           led.ChangeDutyCycle(50)
+            GPIO.output(5, GPIO.LOW)
+            GPIO.output(6, GPIO.HIGH)
+            led.ChangeDutyCycle(50)
 
         if event.type == EventType.ON_RESPONDING_FINISHED:
-           GPIO.output(6,GPIO.LOW)
-           GPIO.output(5,GPIO.LOW)
-           led.ChangeDutyCycle(0)
+            GPIO.output(6, GPIO.LOW)
+            GPIO.output(5, GPIO.LOW)
+            led.ChangeDutyCycle(0)
 
         if event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED:
-           GPIO.output (5, GPIO.LOW)
-           GPIO.output (6, GPIO.LOW)
-           led.ChangeDutyCycle (0)
+            GPIO.output(5, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            led.ChangeDutyCycle(0)
 
         print(event)
 
         if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
                 event.args and not event.args['with_follow_on_turn']):
-            GPIO.output(5,GPIO.LOW)
-            GPIO.output(6,GPIO.LOW)
+            GPIO.output(5, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
             led.ChangeDutyCycle(0)
-            #Uncomment the following after starting the Kodi
-            #with open('/home/pi/.volume.json', 'r') as f:
-                   #vollevel = json.load(f)
-                   #kodi.Application.SetVolume({"volume": vollevel})
+            # Uncomment the following after starting the Kodi
+            # with open('/home/pi/.volume.json', 'r') as f:
+            # vollevel = json.load(f)
+            # kodi.Application.SetVolume({"volume": vollevel})
             if vlcplayer.is_vlc_playing():
                 with open('/home/pi/.mediavolume.json', 'r') as vol:
-                    oldvolume= json.load(vol)
+                    oldvolume = json.load(vol)
                 vlcplayer.set_vlc_volume(int(oldvolume))
             print()
 
@@ -261,8 +256,7 @@ class Myassistant():
             for command, params in event.actions:
                 print('Do command', command, 'with params', str(params))
 
-
-    def register_device(self,project_id, credentials, device_model_id, device_id):
+    def register_device(self, project_id, credentials, device_model_id, device_id):
         """Register the device if needed.
         Registers a new assistant device if an instance with the given id
         does not already exists for this model.
@@ -290,7 +284,6 @@ class Myassistant():
                 raise Exception('failed to register device: ' + r.text)
             print('\rDevice registered.')
 
-
     def detected(self):
         if self.can_start_conversation == True:
             self.assistant.set_mic_mute(False)
@@ -299,8 +292,8 @@ class Myassistant():
 
     def start_detector(self):
         self.detector.start(detected_callback=self.callbacks,
-            interrupt_check=self.interrupt_callback,
-            sleep_time=0.03)
+                            interrupt_check=self.interrupt_callback,
+                            sleep_time=0.03)
 
     def main(self):
         parser = argparse.ArgumentParser(
@@ -351,12 +344,13 @@ class Myassistant():
         # Re-register if "device_model_id" is given by the user and it differs
         # from what we previously registered with.
         should_register = (
-            args.device_model_id and args.device_model_id != device_model_id)
+                args.device_model_id and args.device_model_id != device_model_id)
 
         device_model_id = args.device_model_id or device_model_id
         with Assistant(credentials, device_model_id) as assistant:
             self.assistant = assistant
-            subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Startup.wav"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Startup.wav"], stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             events = assistant.start()
             device_id = assistant.device_id
             print('device_model_id:', device_model_id)
@@ -379,14 +373,14 @@ class Myassistant():
 
             for event in events:
                 self.process_event(event)
-                usrcmd=event.args
+                usrcmd = event.args
                 with open('/home/pi/GassistPi/src/diyHue/config.json', 'r') as config:
-                     hueconfig = json.load(config)
-                for i in range(1,len(hueconfig['lights'])+1):
+                    hueconfig = json.load(config)
+                for i in range(1, len(hueconfig['lights']) + 1):
                     try:
                         if str(hueconfig['lights'][str(i)]['name']).lower() in str(usrcmd).lower():
                             assistant.stop_conversation()
-                            hue_control(str(usrcmd).lower(),str(i),str(hueconfig['lights_address'][str(i)]['ip']))
+                            hue_control(str(usrcmd).lower(), str(i), str(hueconfig['lights_address'][str(i)]['ip']))
                             break
                     except Keyerror:
                         say('Unable to help, please check your config file')
@@ -394,48 +388,63 @@ class Myassistant():
             for num, name in enumerate(tasmota_devicelist):
                 if name.lower() in str(usrcmd).lower():
                     assistant.stop_conversation()
-                    tasmota_control(str(usrcmd).lower(), name.lower(),tasmota_deviceip[num])
+                    tasmota_control(str(usrcmd).lower(), name.lower(), tasmota_deviceip[num])
                     break
             if commands['magic_mirror']['name'].lower() in str(usrcmd).lower():
                 magic_mirror_commands = commands['magic_mirror']
                 assistant.stop_conversation()
                 try:
-                    mmmcommand=str(usrcmd).lower()
+                    mmmcommand = str(usrcmd).lower()
                     if magic_mirror_commands['modules']['weather']['name'].lower() in mmmcommand:
                         if magic_mirror_commands['actions']['show'].lower() in mmmcommand:
-                            mmreq_one=requests.get("http://"+mmmip+":8080/remote?action=SHOW&module=module_2_currentweather")
-                            mmreq_two=requests.get("http://"+mmmip+":8080/remote?action=SHOW&module=module_3_currentweather")
-                            say(messages['magic_mirror']['commands']['generic']['show'] + ' ' + messages['magic_mirror']['commands']['generic']['module'] + ' ' + messages['magic_mirror']['commands']['generic']['modules']['weather'])
+                            mmreq_one = requests.get(
+                                "http://" + mmmip + ":8080/remote?action=SHOW&module=module_2_currentweather")
+                            mmreq_two = requests.get(
+                                "http://" + mmmip + ":8080/remote?action=SHOW&module=module_3_currentweather")
+                            say(messages['magic_mirror']['commands']['generic']['show'] + ' ' +
+                                messages['magic_mirror']['commands']['generic']['module'] + ' ' +
+                                messages['magic_mirror']['commands']['generic']['modules']['weather'])
                         if magic_mirror_commands['actions']['hide'].lower() in mmmcommand:
-                            mmreq_one=requests.get("http://"+mmmip+":8080/remote?action=HIDE&module=module_2_currentweather")
-                            mmreq_two=requests.get("http://"+mmmip+":8080/remote?action=HIDE&module=module_3_currentweather")
-                            say(messages['magic_mirror']['commands']['generic']['hide'] + ' ' + messages['magic_mirror']['commands']['generic']['module'] + ' ' + messages['magic_mirror']['commands']['generic']['modules']['weather'])
+                            mmreq_one = requests.get(
+                                "http://" + mmmip + ":8080/remote?action=HIDE&module=module_2_currentweather")
+                            mmreq_two = requests.get(
+                                "http://" + mmmip + ":8080/remote?action=HIDE&module=module_3_currentweather")
+                            say(messages['magic_mirror']['commands']['generic']['hide'] + ' ' +
+                                messages['magic_mirror']['commands']['generic']['module'] + ' ' +
+                                messages['magic_mirror']['commands']['generic']['modules']['weather'])
                     if magic_mirror_commands['actions']['power_off'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/remote?action=SHUTDOWN")
-                        say(messages['magic_mirror']['commands']['generic']['power_off'] + ' ' + messages['magic_mirror']['name'])
+                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
+                        say(messages['magic_mirror']['commands']['generic']['power_off'] + ' ' +
+                            messages['magic_mirror']['name'])
                     if magic_mirror_commands['actions']['reboot'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/remote?action=REBOOT")
-                        say(messages['magic_mirror']['commands']['generic']['reboot'] + ' ' + messages['magic_mirror']['name'])
+                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
+                        say(messages['magic_mirror']['commands']['generic']['reboot'] + ' ' + messages['magic_mirror'][
+                            'name'])
                     if magic_mirror_commands['actions']['restart'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/remote?action=RESTART")
-                        say(messages['magic_mirror']['commands']['generic']['restart'] + ' ' + messages['magic_mirror']['name'])
+                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
+                        say(messages['magic_mirror']['commands']['generic']['restart'] + ' ' + messages['magic_mirror'][
+                            'name'])
                     if magic_mirror_commands['actions']['display_on'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/remote?action=MONITORON")
-                        say(messages['magic_mirror']['commands']['generic']['display_on'] + ' ' + messages['magic_mirror']['name'])
+                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
+                        say(messages['magic_mirror']['commands']['generic']['display_on'] + ' ' +
+                            messages['magic_mirror']['name'])
                     if magic_mirror_commands['actions']['display_off'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/remote?action=MONITOROFF")
-                        say(messages['magic_mirror']['commands']['generic']['display_off'] + ' ' + messages['magic_mirror']['name'])
+                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITOROFF")
+                        say(messages['magic_mirror']['commands']['generic']['display_off'] + ' ' +
+                            messages['magic_mirror']['name'])
                     if magic_mirror_commands['actions']['hide_all'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/get?data=modules")
+                        mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
                         data = mmreq.json()
                         for module in data:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=HIDE&module=" + module['identifier'])
+                            mmreq = requests.get(
+                                "http://" + mmmip + ":8080/remote?action=HIDE&module=" + module['identifier'])
                         say(messages['magic_mirror']['commands']['generic']['hide_all'])
                     if magic_mirror_commands['actions']['show_all'].lower() in mmmcommand:
-                        mmreq=requests.get("http://"+mmmip+":8080/get?data=modules")
+                        mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
                         data = mmreq.json()
                         for module in data:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHOW&module=" + module['identifier'])
+                            mmreq = requests.get(
+                                "http://" + mmmip + ":8080/remote?action=SHOW&module=" + module['identifier'])
                         say(messages['magic_mirror']['commands']['generic']['show_all'])
 
                 except requests.exceptions.ConnectionError:
