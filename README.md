@@ -6,8 +6,8 @@
 
 ### **Community: For Non-Issue Help and Interaction** [![Join the chat at https://gitter.im/publiclab/publiclab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/GassistPi/Lobby/)
 *******************************************************************************************************************************
-## 16-June-2018 Update:
-**Added playback of spotify playlist for more details, click [here](https://github.com/shivasiddharth/GassistPi/tree/new-config-method#playing-spotify-playlist). Now all the credentials and declarations to be entered in the config.yaml file. This makes updating easy.**  
+## 22-July-2018 Update:
+**Added custom wakeword activation for Armv7 boards, Pi2, Pi3. To use the feature, please install from scratch. Custom wakeword for Pi Zero boards will be added in next update.**    
 *******************************************************************************************************************************
 
 # Features (All features are applicable to all Pi boards, unless and otherwise mentioned):  
@@ -34,6 +34,7 @@
 **21.  Remote control of Magic Mirror.**  
 **22.  Sending voice messages from the phone to the raspberry.**  
 **23.  Play your Spotify playlist.**  
+**24.  Custom wakeword for Armv7 devices Pi2B, Pi3.**      
 *******************************************************************************************************************************  
 **Google's AIY image has the environment in a different directory, which will not work with this project. So please use the Standard Raspbian Desktop/Lite image- [Link](https://www.raspberrypi.org/downloads/raspbian/)**  
 *******************************************************************************************************************************
@@ -212,13 +213,24 @@ Insert your Project Id and Model Id in quotes in the mentioned places
 *******************************************************************
 ## **USING THE CUSTOMIZATIONS**  
 ************************************************
+### **CUSTOM WAKEWORD ACTIVATION**  
+************************************************
+1. You can choose to either Enable or Disable the custom wakeword activation in the config.yaml file.  
+2. In the config.yaml file, under Custom_wakeword, change the status to 'Enabled' if you want to use the custom wakeword or set it to 'Disabled' if you dont want to use the custom wakeword option.  
+3. For changes to take effect, you need to restart the assistant. Changing status while an instance of assistant is already running will not cause any change.  
+4. Create your custom snowboy model [here](https://snowboy.kitt.ai). Add the models to **/home/pi/GassistPi/src/resources**  directory.
+5. Change the paths to the models in the config.yaml file.  
+
+
+************************************************
 ### **PLAYING SPOTIFY PLAYLIST**  
 ************************************************
 **NOTE: Spotify API currently only supports playback in a web browser, but DRM content is being blocked in the Raspberry Pi. As a roundabout approach, I have programmed the assistant to get the playlist details using Spotipy API and then fetch those tracks from YouTube. This custom program has a better accuracy than spotify playlist playback using mpsyt.**   
 
 1. Click [here](https://developer.spotify.com/dashboard/login) and register for a spotify developer account, if you already don't have one.  
 2. In the developer's dashboard, choose "**CREATE A CLIENT ID**". In the pop-up window provide the requested details.  
-3. Click on the new app created and copy the CLIENT ID and CLIENT SECRET. Paste it in the config.yaml file in the indicated space.  
+3. Click on the new app created and copy the CLIENT ID and CLIENT SECRET. Paste it in the config.yaml file in the indicated space.
+4. Access spotify:[here]( https://www.spotify.com/account/overview/) and copy the username to be entered in config.yaml
 
 **Syntax: Hey Google, Play _Your Spotify Playlist Name_ from Spotify**
 
@@ -232,9 +244,9 @@ A custom Google search engine for [Kickstarter](https://www.kickstarter.com) has
 2. Select your project from the list.  
 3. On the left top corner, click on the hamburger icon or three horizontal stacked lines.  
 4. Move your mouse pointer over "API and services" and choose "credentials".
-5. Click on create credentials and select API Key and choose close. Make a note of the created API Key and enter it in the actions.py script at the indicated location.  
+5. Click on create credentials and select API Key and choose close. Make a note of the created API Key and enter it in the **config.yaml** script at the indicated location.  
 6. "From the API and services" option, select library and in the search bar type **search**, select "Custom Search API" and click on "ENABLE".
-7. In the API window, click on "All API Credentials" and in the drop down, make sure to have a tick (check mark) against the API Key that you just generated.
+7. In the API window, click on "All API Credentials" and in the drop down, make sure to have a tick (check mark) against the API Key that you just generated. 
 
 **Note: The same API key can be used for YouTube, but YouTube Data v3 API must be added to the project in the cloud console.**  
 
@@ -443,7 +455,7 @@ The updated music streaming features autoplaying of YouTube suggestions. This ma
 2. Select your project from the list.  
 3. On the left top corner, click on the hamburger icon or three horizontal stacked lines.  
 4. Move your mouse pointer over "API and services" and choose "credentials".
-5. Click on create credentials and select API Key and choose close. Make a note of the created API Key and enter it in the actions.py script at the indicated location.  
+5. Click on create credentials and select API Key and choose close. Make a note of the created API Key and enter it in the **config.yaml** script at the indicated location.  
 6. "From the API and services" option, select library and in the search bar type youtube, select "YouTube Data API v3" API and click on "ENABLE".
 7. In the API window, click on "All API Credentials" and in the drop down, make sure to have a tick (check mark) against the API Key that you just generated.
 

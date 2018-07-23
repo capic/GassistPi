@@ -35,7 +35,11 @@ echo ""
 echo "Your Model-Id used for the project is: $modelid" >> /home/pi/modelid.txt
 cd /home/pi/
 sudo apt-get update -y
-
+sudo apt-get install python-pip -y
+sudo apt-get install libjack-jackd2-dev -y
+sudo apt-get install portaudio19-dev libffi-dev libssl-dev -y
+sudo pip install pyaudio
+sudo apt-get install libatlas-base-dev -y
 sed 's/#.*//' /home/pi/GassistPi/Requirements/GassistPi-system-requirements.txt | xargs sudo apt-get install -y
 
 
@@ -45,7 +49,7 @@ env/bin/python -m pip install --upgrade pip setuptools wheel
 source env/bin/activate
 
 pip install -r /home/pi/GassistPi/Requirements/GassistPi-pip-requirements.txt
-
+pip install https://www.piwheels.org/simple/grpcio/grpcio-1.8.6-cp35-cp35m-linux_armv6l.whl#sha256=157769004462e00b73e32fc47a8b264e3edeaef2d2efb9eecd6b160bc1179da5
 pip install google-assistant-grpc==0.2.0
 pip install google-assistant-sdk==0.5.0
 pip install google-assistant-sdk[samples]==0.5.0
