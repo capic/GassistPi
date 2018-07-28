@@ -107,8 +107,8 @@ commands:
       display_on: 'allumer l''écran'
       display_off: 'éteindre l''écran'
       brightness: 'luminosité'
-      hide_all: 'cacher tout'
-      show_all: 'afficher tout'
+      hide_all: 'cacher tous les modules'
+      show_all: 'afficher tous les modules'
     modules:
       weather:
         name: 'météo'
