@@ -54,6 +54,7 @@ from actions import hue_control
 from actions import vlcplayer
 from actions import spotify_playlist_select
 from actions import configuration
+from actions import get_best_accurate_command
 import snowboydecoder
 import sys
 import signal
