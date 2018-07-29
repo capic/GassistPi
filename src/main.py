@@ -307,11 +307,10 @@ class Myassistant():
                             interrupt_check=self.interrupt_callback,
                             sleep_time=0.03)
 
-    @staticmethod
-    def magic_mirror_treatment():
+    def magic_mirror_treatment(self):
         magic_mirror_commands = commands['magic_mirror']
         magic_mirror_messages = messages['magic_mirror']
-        assistant.stop_conversation()
+        self.assistant.stop_conversation()
         try:
             mmmcommand = str(usrcmd).lower()
             if magic_mirror_commands['modules']['weather']['name'].lower() in mmmcommand:
