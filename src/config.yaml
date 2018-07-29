@@ -99,7 +99,7 @@ Tasmota_devicelist:
 
 commands:
   magic_mirror:
-    name: 'magic mirror'
+    name: 'mirroir'
     actions:
       show: 'afficher'
       hide: 'cacher'
