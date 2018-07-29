@@ -59,8 +59,6 @@ import snowboydecoder
 import sys
 import signal
 from threading import Thread
-from difflib import SequenceMatcher
-from operator import attrgetter
 
 try:
     FileNotFoundError

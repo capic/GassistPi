@@ -34,6 +34,8 @@ import pychromecast
 import spotipy
 import pprint
 import yaml
+from difflib import SequenceMatcher
+from operator import attrgetter
 
 with open('/home/pi/GassistPi/src/config.yaml','r') as conf:
     configuration = yaml.load(conf)
