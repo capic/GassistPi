@@ -314,8 +314,8 @@ class Myassistant():
         accurates_commands = []
         for command in commands_list:
             if command.lower() in mmmcommand:
-                accurates_commands = {command: command, accurate: SequenceMatcher(None, command.lower(), mmmcommand).ratio()}
-
+                accurates_commands.append({command: command, accurate: SequenceMatcher(None, command.lower(), mmmcommand).ratio()})
+        print(accurates_commands)
         return max(accurates_commands, key=attrgetter('accurate')).command
 
     def magic_mirror_treatment(self, usrcmd):
