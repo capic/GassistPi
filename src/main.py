@@ -355,32 +355,32 @@ class Myassistant():
             else:
                 mmmcommand_accurate = self.get_best_accurate_command(magic_mirror_commands['generic']['actions'], mmmcommand)
                 if mmmcommand_accurate is not None:
-                    if magic_mirror_commands['actions']['power_off'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['power_off'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['power_off'] + ' ' + \
                                          magic_mirror_messages['name']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
-                    if magic_mirror_commands['actions']['reboot'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['reboot'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['reboot'] + ' ' + magic_mirror_messages[
                             'name']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
-                    if magic_mirror_commands['actions']['restart'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['restart'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['restart'] + ' ' + \
                                          magic_mirror_messages['name']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
-                    if magic_mirror_commands['actions']['display_on'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['display_on'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['display_on'] + ' ' + \
                                          magic_mirror_messages['commands']['name']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
-                    if magic_mirror_commands['actions']['display_off'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['display_off'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['display_off'] + ' ' + \
                                          magic_mirror_messages['name']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITOROFF")
-                    if magic_mirror_commands['actions']['hide_all'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['hide_all'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['hide_all']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
@@ -388,7 +388,7 @@ class Myassistant():
                         for module in data:
                             mmreq = requests.get(
                                 "http://" + mmmip + ":8080/remote?action=HIDE&module=" + module['identifier'])
-                    if magic_mirror_commands['actions']['show_all'].lower() == mmmcommand_accurate:
+                    if magic_mirror_commands['generic']['actions']['show_all'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['show_all']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
