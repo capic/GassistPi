@@ -241,7 +241,9 @@ def get_best_accurate_command(commands_list, mmmcommand):
             accurates_commands.append(type('',(object,),{'command': commands_list[command].lower(), 'accurate': SequenceMatcher(None, command.lower(), mmmcommand).ratio()})())
 
     if len(accurates_commands) > 0:
-        return max(accurates_commands, key=attrgetter('accurate')).command
+        max_accurated_command = max(accurates_commands, key=attrgetter('accurate')).command
+        print(max_accurated_command)
+        return max_accurated_command
     else:
         return None
 
