@@ -334,7 +334,7 @@ class Myassistant():
                         "http://" + mmmip + ":8080/remote?action=HIDE&module=module_3_currentweather")
             if magic_mirror_commands['actions']['power_off'].lower() in mmmcommand:
                 message_to_say = magic_mirror_messages['commands']['generic']['power_off'] + ' ' + \
-                                 magic_mirror_messages['magic_mirror']['name']
+                                 magic_mirror_messages['name']
                 say(message_to_say)
                 mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
             if magic_mirror_commands['actions']['reboot'].lower() in mmmcommand:
@@ -344,7 +344,7 @@ class Myassistant():
                 mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
             if magic_mirror_commands['actions']['restart'].lower() in mmmcommand:
                 message_to_say = magic_mirror_messages['commands']['generic']['restart'] + ' ' + \
-                                 messages['magic_mirror']['name']
+                                 magic_mirror_messages['name']
                 say(message_to_say)
                 mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
             if magic_mirror_commands['actions']['display_on'].lower() in mmmcommand:
