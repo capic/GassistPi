@@ -314,7 +314,7 @@ class Myassistant():
         accurates_commands = []
         for command in commands_list:
             if commands_list[command].lower() in mmmcommand:
-                accurates_commands.append(type('',(object,),{'command': command.lower(), 'accurate': SequenceMatcher(None, command.lower(), mmmcommand).ratio()})())
+                accurates_commands.append(type('',(object,),{'command': commands_list[command].lower(), 'accurate': SequenceMatcher(None, command.lower(), mmmcommand).ratio()})())
 
         if len(accurates_commands) > 0:
             return max(accurates_commands, key=attrgetter('accurate')).command
