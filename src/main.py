@@ -316,7 +316,7 @@ class Myassistant():
             print(commands_list[command])
             if commands_list[command].lower() in mmmcommand:
                 print(command.lower() + " dedans")
-                accurates_commands.append({command: command, accurate: SequenceMatcher(None, command.lower(), mmmcommand).ratio()})
+                accurates_commands.append(type('',(object,),{'command': command, 'accurate': SequenceMatcher(None, command.lower(), mmmcommand).ratio()})())
         print(accurates_commands)
 
         if len(accurates_commands) > 0:
