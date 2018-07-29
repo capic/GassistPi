@@ -118,6 +118,9 @@ commands:
 messages:
   magic_mirror:
     name: 'magic mirror'
+    error:
+      not_online: 'n''est pas en ligne'
+      no_command: 'aucune commande ne correspond'
     commands:
       generic:
         show: 'Affiche'

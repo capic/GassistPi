@@ -458,9 +458,10 @@ class Myassistant():
                             for module in data:
                                 mmreq = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=SHOW&module=" + module['identifier'])
-
+                        else:
+                            say(messages['magic_mirror']['error']['no_command'])
                     except requests.exceptions.ConnectionError:
-                        say("Magic mirror not online")
+                        say(messages['magic_mirror']['name'] + ' ' + messages['magic_mirror']['error']['not_online'])
                 if 'ingredients'.lower() in str(usrcmd).lower():
                     assistant.stop_conversation()
                     ingrequest = str(usrcmd).lower()
