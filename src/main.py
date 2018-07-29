@@ -313,8 +313,8 @@ class Myassistant():
     def get_best_accurate_command(commands_list, mmmcommand):
         accurates_commands = []
         for command in commands_list:
-            print(command)
-            if command.lower() in mmmcommand:
+            print(commands_list[command])
+            if commands_list[command].lower() in mmmcommand:
                 print(command.lower() + " dedans")
                 accurates_commands.append({command: command, accurate: SequenceMatcher(None, command.lower(), mmmcommand).ratio()})
         print(accurates_commands)
