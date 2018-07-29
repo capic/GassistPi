@@ -477,7 +477,7 @@ class Myassistant():
                         tasmota_control(str(usrcmd).lower(), name.lower(), tasmota_deviceip[num])
                         break
                 if commands['magic_mirror']['name'].lower() in str(usrcmd).lower():
-                    magic_mirror_treatment()
+                    self.magic_mirror_treatment()
                 if 'ingredients'.lower() in str(usrcmd).lower():
                     assistant.stop_conversation()
                     ingrequest = str(usrcmd).lower()
