@@ -370,7 +370,7 @@ class Myassistant():
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
                     if magic_mirror_commands['generic']['actions']['display_on'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['display_on'] + ' ' + \
-                                         magic_mirror_messages['commands']['name']
+                                         magic_mirror_messages['name']
                         say(message_to_say)
                         mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
                     if magic_mirror_commands['generic']['actions']['display_off'].lower() == mmmcommand_accurate:
