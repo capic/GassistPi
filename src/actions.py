@@ -242,9 +242,9 @@ def get_best_accurate_command(commands_list, mmmcommand):
 
     if len(accurates_commands) > 0:
         print(accurates_commands)
-        max_accurated_command = max(accurates_commands, key=attrgetter('accurate')).command
-        print(max_accurated_command)
-        return max_accurated_command
+        max_accurated_command = max(accurates_commands, key=attrgetter('accurate'))
+        print(max_accurated_command.command + ' ' + max_accurated_command.accurate)
+        return max_accurated_command.command
     else:
         return None
 
