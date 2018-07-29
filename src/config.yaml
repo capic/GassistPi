@@ -131,7 +131,7 @@ messages:
         restart: 'Redémarre'
         display_on: 'Allume l''écran'
         display_off: 'Eteindre l''écran'
-        hide_all: 'Cache tout'
-        show_all: 'Affiche tout'
+        hide_all: 'Cache tous les modules'
+        show_all: 'Affiche tous les modules'
     modules:
       weather: 'Météo'
