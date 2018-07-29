@@ -231,6 +231,18 @@ def convert_rgb_xy(red,green,blue):
         say("No RGB values given")
 
 
+def get_best_accurate_command(commands_list, mmmcommand):
+    accurates_commands = []
+    for command in commands_list:
+        if commands_list[command].lower() in mmmcommand:
+            accurates_commands.append(type('',(object,),{'command': commands_list[command].lower(), 'accurate': SequenceMatcher(None, command.lower(), mmmcommand).ratio()})())
+
+    if len(accurates_commands) > 0:
+        return max(accurates_commands, key=attrgetter('accurate')).command
+    else:
+        return None
+
+
 #Radio Station Streaming
 def radio(phrase):
     for num, name in enumerate(stnname):
