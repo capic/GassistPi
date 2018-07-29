@@ -309,6 +309,7 @@ class Myassistant():
                             interrupt_check=self.interrupt_callback,
                             sleep_time=0.03)
 
+    @staticmethod
     def get_best_accurate_command(commands_list, mmmcommand):
         accurates_commands = []
         for command in commands_list:
