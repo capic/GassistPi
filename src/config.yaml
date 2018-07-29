@@ -100,17 +100,18 @@ Tasmota_devicelist:
 commands:
   magic_mirror:
     name: 'miroir'
-    actions:
-      show: 'afficher'
-      hide: 'cacher'
-      power_off: 'éteindre'
-      reboot: 'reboot'
-      restart: 'redémarrer'
-      display_on: 'allumer l''écran'
-      display_off: 'éteindre l''écran'
-      brightness: 'luminosité'
-      hide_all: 'cacher tous les modules'
-      show_all: 'afficher tous les modules'
+    generic:
+      actions:
+        show: 'afficher'
+        hide: 'cacher'
+        power_off: 'éteindre'
+        reboot: 'reboot'
+        restart: 'redémarrer'
+        display_on: 'allumer l''écran'
+        display_off: 'éteindre l''écran'
+        brightness: 'luminosité'
+        hide_all: 'cacher tous les modules'
+        show_all: 'afficher tous les modules'
     modules:
       weather:
         name: 'météo'
