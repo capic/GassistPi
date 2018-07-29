@@ -339,7 +339,6 @@ class Myassistant():
             else:
                 mmmcommand_accurate = get_best_accurate_command(magic_mirror_commands['generic']['actions'], mmmcommand)
                 if mmmcommand_accurate is not None:
-                    print(magic_mirror_commands['generic']['actions']['power_off'].lower() + ' ' + mmmcommand_accurate)
                     if magic_mirror_commands['generic']['actions']['power_off'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['power_off'] + ' ' + \
                                          magic_mirror_messages['name']
