@@ -145,7 +145,7 @@ quote = "http://feeds.feedburner.com/brainyquote/QUOTEBR"
 ##Speech and translator declarations
 ttsfilename="/tmp/say.mp3"
 translator = Translator()
-language='en'
+language=configuration['speech_translation_language']
 ## Other language options:
 ##'af'    : 'Afrikaans'         'sq' : 'Albanian'           'ar' : 'Arabic'      'hy'    : 'Armenian'
 ##'bn'    : 'Bengali'           'ca' : 'Catalan'            'zh' : 'Chinese'     'zh-cn' : 'Chinese (China)'
