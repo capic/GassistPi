@@ -325,7 +325,7 @@ class Myassistant():
             mmmcommand = str(usrcmd).lower()
 
             if magic_mirror_commands['modules']['weather']['name'].lower() in mmmcommand:
-                mmmcommand_accurate = get_best_accurate_command(magic_mirror_commands['modules']['weather']['actions'], mmmcommand)
+                mmmcommand_accurate = self.get_best_accurate_command(magic_mirror_commands['modules']['weather']['actions'], mmmcommand)
                 if magic_mirror_commands['actions']['show'].lower() == mmmcommand_accurate:
                     message_to_say = magic_mirror_messages['commands']['generic']['show'] + ' ' + \
                                      magic_mirror_messages['commands']['generic']['module'] + ' ' + \
@@ -345,7 +345,7 @@ class Myassistant():
                     mmreq_two = requests.get(
                         "http://" + mmmip + ":8080/remote?action=HIDE&module=module_3_currentweather")
             else:
-                mmmcommand_accurate = get_best_accurate_command(magic_mirror_commands['generic']['actions'], mmmcommand)
+                mmmcommand_accurate = self.get_best_accurate_command(magic_mirror_commands['generic']['actions'], mmmcommand)
                 if magic_mirror_commands['actions']['power_off'].lower() == mmmcommand_accurate:
                     message_to_say = magic_mirror_messages['commands']['generic']['power_off'] + ' ' + \
                                      magic_mirror_messages['name']
