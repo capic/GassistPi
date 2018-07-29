@@ -409,55 +409,55 @@ class Myassistant():
                         mmmcommand = str(usrcmd).lower()
                         if magic_mirror_commands['modules']['weather']['name'].lower() in mmmcommand:
                             if magic_mirror_commands['actions']['show'].lower() in mmmcommand:
+                                say(messages['magic_mirror']['commands']['generic']['show'] + ' ' +
+                                    messages['magic_mirror']['commands']['generic']['module'] + ' ' +
+                                    messages['magic_mirror']['commands']['generic']['modules']['weather'])
                                 mmreq_one = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=SHOW&module=module_2_currentweather")
                                 mmreq_two = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=SHOW&module=module_3_currentweather")
-                                say(messages['magic_mirror']['commands']['generic']['show'] + ' ' +
+                            if magic_mirror_commands['actions']['hide'].lower() in mmmcommand:
+                                say(messages['magic_mirror']['commands']['generic']['hide'] + ' ' +
                                     messages['magic_mirror']['commands']['generic']['module'] + ' ' +
                                     messages['magic_mirror']['commands']['generic']['modules']['weather'])
-                            if magic_mirror_commands['actions']['hide'].lower() in mmmcommand:
                                 mmreq_one = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=HIDE&module=module_2_currentweather")
                                 mmreq_two = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=HIDE&module=module_3_currentweather")
-                                say(messages['magic_mirror']['commands']['generic']['hide'] + ' ' +
-                                    messages['magic_mirror']['commands']['generic']['module'] + ' ' +
-                                    messages['magic_mirror']['commands']['generic']['modules']['weather'])
                         if magic_mirror_commands['actions']['power_off'].lower() in mmmcommand:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
                             say(messages['magic_mirror']['commands']['generic']['power_off'] + ' ' +
                                 messages['magic_mirror']['name'])
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
                         if magic_mirror_commands['actions']['reboot'].lower() in mmmcommand:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
                             say(messages['magic_mirror']['commands']['generic']['reboot'] + ' ' + messages['magic_mirror'][
                                 'name'])
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
                         if magic_mirror_commands['actions']['restart'].lower() in mmmcommand:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
                             say(messages['magic_mirror']['commands']['generic']['restart'] + ' ' + messages['magic_mirror'][
                                 'name'])
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
                         if magic_mirror_commands['actions']['display_on'].lower() in mmmcommand:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
                             say(messages['magic_mirror']['commands']['generic']['display_on'] + ' ' +
                                 messages['magic_mirror']['name'])
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
                         if magic_mirror_commands['actions']['display_off'].lower() in mmmcommand:
-                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITOROFF")
                             say(messages['magic_mirror']['commands']['generic']['display_off'] + ' ' +
                                 messages['magic_mirror']['name'])
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITOROFF")
                         if magic_mirror_commands['actions']['hide_all'].lower() in mmmcommand:
+                            say(messages['magic_mirror']['commands']['generic']['hide_all'])
                             mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
                             data = mmreq.json()
                             for module in data:
                                 mmreq = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=HIDE&module=" + module['identifier'])
-                            say(messages['magic_mirror']['commands']['generic']['hide_all'])
                         if magic_mirror_commands['actions']['show_all'].lower() in mmmcommand:
+                            say(messages['magic_mirror']['commands']['generic']['show_all'])
                             mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
                             data = mmreq.json()
                             for module in data:
                                 mmreq = requests.get(
                                     "http://" + mmmip + ":8080/remote?action=SHOW&module=" + module['identifier'])
-                            say(messages['magic_mirror']['commands']['generic']['show_all'])
 
                     except requests.exceptions.ConnectionError:
                         say("Magic mirror not online")
