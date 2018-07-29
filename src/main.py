@@ -26,6 +26,7 @@ import subprocess
 import re
 import psutil
 import logging
+import time
 import google.oauth2.credentials
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
@@ -92,6 +93,7 @@ GPIO.setup(5, GPIO.OUT)
 GPIO.setup(6, GPIO.OUT)
 GPIO.output(5, GPIO.LOW)
 GPIO.output(6, GPIO.LOW)
+GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 led = GPIO.PWM(25, 1)
 led.start(0)
 
@@ -152,12 +154,20 @@ class Myassistant():
         self.callbacks = [self.detected] * len(models)
         self.detector = snowboydecoder.HotwordDetector(models, sensitivity=self.sensitivity)
         self.t1 = Thread(target=self.start_detector)
+        self.t2 = Thread(target=self.stopbutton)
 
     def signal_handler(self, signal, frame):
         self.interrupted = True
 
     def interrupt_callback(self, ):
         return self.interrupted
+
+    def stopbutton(self):
+        while GPIO.input(23):
+            time.sleep(0.01)
+            if not GPIO.input(23):
+                print('Stopped')
+                stop()
 
     def process_device_actions(self, event, device_id):
         if 'inputs' in event.args:
@@ -183,8 +193,10 @@ class Myassistant():
         print(event)
         if event.type == EventType.ON_START_FINISHED:
             self.can_start_conversation = True
+            self.t2.start()
             if custom_wakeword:
                 self.t1.start()
+
         if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
             subprocess.Popen(["aplay", "/home/pi/GassistPi/sample-audio-files/Fb.wav"], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -385,210 +397,212 @@ class Myassistant():
                     except Keyerror:
                         say('Unable to help, please check your config file')
 
-            for num, name in enumerate(tasmota_devicelist):
-                if name.lower() in str(usrcmd).lower():
+                for num, name in enumerate(tasmota_devicelist):
+                    if name.lower() in str(usrcmd).lower():
+                        assistant.stop_conversation()
+                        tasmota_control(str(usrcmd).lower(), name.lower(), tasmota_deviceip[num])
+                        break
+                if commands['magic_mirror']['name'].lower() in str(usrcmd).lower():
+                    magic_mirror_commands = commands['magic_mirror']
                     assistant.stop_conversation()
-                    tasmota_control(str(usrcmd).lower(), name.lower(), tasmota_deviceip[num])
-                    break
-            if commands['magic_mirror']['name'].lower() in str(usrcmd).lower():
-                magic_mirror_commands = commands['magic_mirror']
-                assistant.stop_conversation()
-                try:
-                    mmmcommand = str(usrcmd).lower()
-                    if magic_mirror_commands['modules']['weather']['name'].lower() in mmmcommand:
-                        if magic_mirror_commands['actions']['show'].lower() in mmmcommand:
-                            mmreq_one = requests.get(
-                                "http://" + mmmip + ":8080/remote?action=SHOW&module=module_2_currentweather")
-                            mmreq_two = requests.get(
-                                "http://" + mmmip + ":8080/remote?action=SHOW&module=module_3_currentweather")
-                            say(messages['magic_mirror']['commands']['generic']['show'] + ' ' +
-                                messages['magic_mirror']['commands']['generic']['module'] + ' ' +
-                                messages['magic_mirror']['commands']['generic']['modules']['weather'])
-                        if magic_mirror_commands['actions']['hide'].lower() in mmmcommand:
-                            mmreq_one = requests.get(
-                                "http://" + mmmip + ":8080/remote?action=HIDE&module=module_2_currentweather")
-                            mmreq_two = requests.get(
-                                "http://" + mmmip + ":8080/remote?action=HIDE&module=module_3_currentweather")
-                            say(messages['magic_mirror']['commands']['generic']['hide'] + ' ' +
-                                messages['magic_mirror']['commands']['generic']['module'] + ' ' +
-                                messages['magic_mirror']['commands']['generic']['modules']['weather'])
-                    if magic_mirror_commands['actions']['power_off'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
-                        say(messages['magic_mirror']['commands']['generic']['power_off'] + ' ' +
-                            messages['magic_mirror']['name'])
-                    if magic_mirror_commands['actions']['reboot'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
-                        say(messages['magic_mirror']['commands']['generic']['reboot'] + ' ' + messages['magic_mirror'][
-                            'name'])
-                    if magic_mirror_commands['actions']['restart'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
-                        say(messages['magic_mirror']['commands']['generic']['restart'] + ' ' + messages['magic_mirror'][
-                            'name'])
-                    if magic_mirror_commands['actions']['display_on'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
-                        say(messages['magic_mirror']['commands']['generic']['display_on'] + ' ' +
-                            messages['magic_mirror']['name'])
-                    if magic_mirror_commands['actions']['display_off'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITOROFF")
-                        say(messages['magic_mirror']['commands']['generic']['display_off'] + ' ' +
-                            messages['magic_mirror']['name'])
-                    if magic_mirror_commands['actions']['hide_all'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
-                        data = mmreq.json()
-                        for module in data:
-                            mmreq = requests.get(
-                                "http://" + mmmip + ":8080/remote?action=HIDE&module=" + module['identifier'])
-                        say(messages['magic_mirror']['commands']['generic']['hide_all'])
-                    if magic_mirror_commands['actions']['show_all'].lower() in mmmcommand:
-                        mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
-                        data = mmreq.json()
-                        for module in data:
-                            mmreq = requests.get(
-                                "http://" + mmmip + ":8080/remote?action=SHOW&module=" + module['identifier'])
-                        say(messages['magic_mirror']['commands']['generic']['show_all'])
+                    try:
+                        mmmcommand = str(usrcmd).lower()
+                        if magic_mirror_commands['modules']['weather']['name'].lower() in mmmcommand:
+                            if magic_mirror_commands['actions']['show'].lower() in mmmcommand:
+                                mmreq_one = requests.get(
+                                    "http://" + mmmip + ":8080/remote?action=SHOW&module=module_2_currentweather")
+                                mmreq_two = requests.get(
+                                    "http://" + mmmip + ":8080/remote?action=SHOW&module=module_3_currentweather")
+                                say(messages['magic_mirror']['commands']['generic']['show'] + ' ' +
+                                    messages['magic_mirror']['commands']['generic']['module'] + ' ' +
+                                    messages['magic_mirror']['commands']['generic']['modules']['weather'])
+                            if magic_mirror_commands['actions']['hide'].lower() in mmmcommand:
+                                mmreq_one = requests.get(
+                                    "http://" + mmmip + ":8080/remote?action=HIDE&module=module_2_currentweather")
+                                mmreq_two = requests.get(
+                                    "http://" + mmmip + ":8080/remote?action=HIDE&module=module_3_currentweather")
+                                say(messages['magic_mirror']['commands']['generic']['hide'] + ' ' +
+                                    messages['magic_mirror']['commands']['generic']['module'] + ' ' +
+                                    messages['magic_mirror']['commands']['generic']['modules']['weather'])
+                        if magic_mirror_commands['actions']['power_off'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=SHUTDOWN")
+                            say(messages['magic_mirror']['commands']['generic']['power_off'] + ' ' +
+                                messages['magic_mirror']['name'])
+                        if magic_mirror_commands['actions']['reboot'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=REBOOT")
+                            say(messages['magic_mirror']['commands']['generic']['reboot'] + ' ' + messages['magic_mirror'][
+                                'name'])
+                        if magic_mirror_commands['actions']['restart'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=RESTART")
+                            say(messages['magic_mirror']['commands']['generic']['restart'] + ' ' + messages['magic_mirror'][
+                                'name'])
+                        if magic_mirror_commands['actions']['display_on'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITORON")
+                            say(messages['magic_mirror']['commands']['generic']['display_on'] + ' ' +
+                                messages['magic_mirror']['name'])
+                        if magic_mirror_commands['actions']['display_off'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/remote?action=MONITOROFF")
+                            say(messages['magic_mirror']['commands']['generic']['display_off'] + ' ' +
+                                messages['magic_mirror']['name'])
+                        if magic_mirror_commands['actions']['hide_all'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
+                            data = mmreq.json()
+                            for module in data:
+                                mmreq = requests.get(
+                                    "http://" + mmmip + ":8080/remote?action=HIDE&module=" + module['identifier'])
+                            say(messages['magic_mirror']['commands']['generic']['hide_all'])
+                        if magic_mirror_commands['actions']['show_all'].lower() in mmmcommand:
+                            mmreq = requests.get("http://" + mmmip + ":8080/get?data=modules")
+                            data = mmreq.json()
+                            for module in data:
+                                mmreq = requests.get(
+                                    "http://" + mmmip + ":8080/remote?action=SHOW&module=" + module['identifier'])
+                            say(messages['magic_mirror']['commands']['generic']['show_all'])
 
-                except requests.exceptions.ConnectionError:
-                    say("Magic mirror not online")
-                    if 'ingredients'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        ingrequest = str(usrcmd).lower()
-                        ingredientsidx = ingrequest.find('for')
-                        ingrequest = ingrequest[ingredientsidx:]
-                        ingrequest = ingrequest.replace('for', "", 1)
-                        ingrequest = ingrequest.replace("'}", "", 1)
-                        ingrequest = ingrequest.strip()
-                        ingrequest = ingrequest.replace(" ", "%20", 1)
-                        getrecipe(ingrequest)
-                    if 'kickstarter'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        kickstarter_tracker(str(usrcmd).lower())
-                    if 'trigger'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        Action(str(usrcmd).lower())
-                    if 'stream'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        vlcplayer.stop_vlc()
-                        if 'autoplay'.lower() in str(usrcmd).lower():
-                            YouTube_Autoplay(str(usrcmd).lower())
-                        else:
-                            YouTube_No_Autoplay(str(usrcmd).lower())
-                    if 'stop'.lower() in str(usrcmd).lower():
-                        stop()
-                    if 'radio'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        radio(str(usrcmd).lower())
-                    if 'wireless'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        ESP(str(usrcmd).lower())
-                    if 'parcel'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        track()
-                    if 'news'.lower() in str(usrcmd).lower() or 'feed'.lower() in str(
-                            usrcmd).lower() or 'quote'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        feed(str(usrcmd).lower())
-                    if 'on kodi'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        kodiactions(str(usrcmd).lower())
-                    # Google Assistant now comes built in with chromecast control, so custom function has been commented
-                    # if 'chromecast'.lower() in str(usrcmd).lower():
-                    #     assistant.stop_conversation()
-                    #     if 'play'.lower() in str(usrcmd).lower():
-                    #         chromecast_play_video(str(usrcmd).lower())
-                    #     else:
-                    #         chromecast_control(usrcmd)
-                    if 'pause music'.lower() in str(usrcmd).lower() or 'resume music'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        if vlcplayer.is_vlc_playing():
-                            if 'pause music'.lower() in str(usrcmd).lower():
-                                vlcplayer.pause_vlc()
-                        if checkvlcpaused():
-                            if 'resume music'.lower() in str(usrcmd).lower():
-                                vlcplayer.play_vlc()
-                        elif vlcplayer.is_vlc_playing() == False and checkvlcpaused() == False:
-                            say("Sorry nothing is playing right now")
-                    if 'music volume'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        if vlcplayer.is_vlc_playing() == True or checkvlcpaused() == True:
-                            if 'set'.lower() in str(usrcmd).lower() or 'change'.lower() in str(usrcmd).lower():
-                                if 'hundred'.lower() in str(usrcmd).lower() or 'maximum' in str(usrcmd).lower():
-                                    settingvollevel = 100
+                    except requests.exceptions.ConnectionError:
+                        say("Magic mirror not online")
+                if 'ingredients'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    ingrequest = str(usrcmd).lower()
+                    ingredientsidx = ingrequest.find('for')
+                    ingrequest = ingrequest[ingredientsidx:]
+                    ingrequest = ingrequest.replace('for', "", 1)
+                    ingrequest = ingrequest.replace("'}", "", 1)
+                    ingrequest = ingrequest.strip()
+                    ingrequest = ingrequest.replace(" ", "%20", 1)
+                    getrecipe(ingrequest)
+                if 'kickstarter'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    kickstarter_tracker(str(usrcmd).lower())
+                if 'trigger'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    Action(str(usrcmd).lower())
+                if 'stream'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    vlcplayer.stop_vlc()
+                    if 'autoplay'.lower() in str(usrcmd).lower():
+                        YouTube_Autoplay(str(usrcmd).lower())
+                    else:
+                        YouTube_No_Autoplay(str(usrcmd).lower())
+                if 'stop'.lower() in str(usrcmd).lower():
+                    stop()
+                if 'radio'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    radio(str(usrcmd).lower())
+                if 'wireless'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    ESP(str(usrcmd).lower())
+                if 'parcel'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    track()
+                if 'news'.lower() in str(usrcmd).lower() or 'feed'.lower() in str(
+                        usrcmd).lower() or 'quote'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    feed(str(usrcmd).lower())
+                if 'on kodi'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    kodiactions(str(usrcmd).lower())
+                # Google Assistant now comes built in with chromecast control, so custom function has been commented
+                # if 'chromecast'.lower() in str(usrcmd).lower():
+                #     assistant.stop_conversation()
+                #     if 'play'.lower() in str(usrcmd).lower():
+                #         chromecast_play_video(str(usrcmd).lower())
+                #     else:
+                #         chromecast_control(usrcmd)
+                if 'pause music'.lower() in str(usrcmd).lower() or 'resume music'.lower() in str(
+                        usrcmd).lower():
+                    assistant.stop_conversation()
+                    if vlcplayer.is_vlc_playing():
+                        if 'pause music'.lower() in str(usrcmd).lower():
+                            vlcplayer.pause_vlc()
+                    if checkvlcpaused():
+                        if 'resume music'.lower() in str(usrcmd).lower():
+                            vlcplayer.play_vlc()
+                    elif vlcplayer.is_vlc_playing() == False and checkvlcpaused() == False:
+                        say("Sorry nothing is playing right now")
+                if 'music volume'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    if vlcplayer.is_vlc_playing() == True or checkvlcpaused() == True:
+                        if 'set'.lower() in str(usrcmd).lower() or 'change'.lower() in str(usrcmd).lower():
+                            if 'hundred'.lower() in str(usrcmd).lower() or 'maximum' in str(usrcmd).lower():
+                                settingvollevel = 100
+                                with open('/home/pi/.mediavolume.json', 'w') as vol:
+                                    json.dump(settingvollevel, vol)
+                            elif 'zero'.lower() in str(usrcmd).lower() or 'minimum' in str(usrcmd).lower():
+                                settingvollevel = 0
+                                with open('/home/pi/.mediavolume.json', 'w') as vol:
+                                    json.dump(settingvollevel, vol)
+                            else:
+                                for settingvollevel in re.findall(r"[-+]?\d*\.\d+|\d+", str(usrcmd)):
                                     with open('/home/pi/.mediavolume.json', 'w') as vol:
                                         json.dump(settingvollevel, vol)
-                                elif 'zero'.lower() in str(usrcmd).lower() or 'minimum' in str(usrcmd).lower():
-                                    settingvollevel = 0
-                                    with open('/home/pi/.mediavolume.json', 'w') as vol:
-                                        json.dump(settingvollevel, vol)
+                            print('Setting volume to: ' + str(settingvollevel))
+                            vlcplayer.set_vlc_volume(int(settingvollevel))
+                        elif 'increase'.lower() in str(usrcmd).lower() or 'decrease'.lower() in str(
+                                usrcmd).lower() or 'reduce'.lower() in str(usrcmd).lower():
+                            if os.path.isfile("/home/pi/.mediavolume.json"):
+                                with open('/home/pi/.mediavolume.json', 'r') as vol:
+                                    oldvollevel = json.load(vol)
+                                    for oldvollevel in re.findall(r'\b\d+\b', str(oldvollevel)):
+                                        oldvollevel = int(oldvollevel)
+                            else:
+                                oldvollevel = vlcplayer.get_vlc_volume
+                                for oldvollevel in re.findall(r"[-+]?\d*\.\d+|\d+", str(output)):
+                                    oldvollevel = int(oldvollevel)
+                            if 'increase'.lower() in str(usrcmd).lower():
+                                if any(char.isdigit() for char in str(usrcmd)):
+                                    for changevollevel in re.findall(r'\b\d+\b', str(usrcmd)):
+                                        changevollevel = int(changevollevel)
                                 else:
-                                    for settingvollevel in re.findall(r"[-+]?\d*\.\d+|\d+", str(usrcmd)):
-                                        with open('/home/pi/.mediavolume.json', 'w') as vol:
-                                            json.dump(settingvollevel, vol)
+                                    changevollevel = 10
+                                newvollevel = oldvollevel + changevollevel
+                                print(newvollevel)
+                                if int(newvollevel) > 100:
+                                    settingvollevel == 100
+                                elif int(newvollevel) < 0:
+                                    settingvollevel == 0
+                                else:
+                                    settingvollevel = newvollevel
+                                with open('/home/pi/.mediavolume.json', 'w') as vol:
+                                    json.dump(settingvollevel, vol)
                                 print('Setting volume to: ' + str(settingvollevel))
                                 vlcplayer.set_vlc_volume(int(settingvollevel))
-                            elif 'increase'.lower() in str(usrcmd).lower() or 'decrease'.lower() in str(
-                                    usrcmd).lower() or 'reduce'.lower() in str(usrcmd).lower():
-                                if os.path.isfile("/home/pi/.mediavolume.json"):
-                                    with open('/home/pi/.mediavolume.json', 'r') as vol:
-                                        oldvollevel = json.load(vol)
-                                        for oldvollevel in re.findall(r'\b\d+\b', str(oldvollevel)):
-                                            oldvollevel = int(oldvollevel)
+                            if 'decrease'.lower() in str(usrcmd).lower() or 'reduce'.lower() in str(
+                                    usrcmd).lower():
+                                if any(char.isdigit() for char in str(usrcmd)):
+                                    for changevollevel in re.findall(r'\b\d+\b', str(usrcmd)):
+                                        changevollevel = int(changevollevel)
                                 else:
-                                    oldvollevel = vlcplayer.get_vlc_volume
-                                    for oldvollevel in re.findall(r"[-+]?\d*\.\d+|\d+", str(output)):
-                                        oldvollevel = int(oldvollevel)
-                                if 'increase'.lower() in str(usrcmd).lower():
-                                    if any(char.isdigit() for char in str(usrcmd)):
-                                        for changevollevel in re.findall(r'\b\d+\b', str(usrcmd)):
-                                            changevollevel = int(changevollevel)
-                                    else:
-                                        changevollevel = 10
-                                    newvollevel = oldvollevel + changevollevel
-                                    print(newvollevel)
-                                    if int(newvollevel) > 100:
-                                        settingvollevel == 100
-                                    elif int(newvollevel) < 0:
-                                        settingvollevel == 0
-                                    else:
-                                        settingvollevel = newvollevel
-                                    with open('/home/pi/.mediavolume.json', 'w') as vol:
-                                        json.dump(settingvollevel, vol)
-                                    print('Setting volume to: ' + str(settingvollevel))
-                                    vlcplayer.set_vlc_volume(int(settingvollevel))
-                                if 'decrease'.lower() in str(usrcmd).lower() or 'reduce'.lower() in str(usrcmd).lower():
-                                    if any(char.isdigit() for char in str(usrcmd)):
-                                        for changevollevel in re.findall(r'\b\d+\b', str(usrcmd)):
-                                            changevollevel = int(changevollevel)
-                                    else:
-                                        changevollevel = 10
-                                    newvollevel = oldvollevel - changevollevel
-                                    print(newvollevel)
-                                    if int(newvollevel) > 100:
-                                        settingvollevel == 100
-                                    elif int(newvollevel) < 0:
-                                        settingvollevel == 0
-                                    else:
-                                        settingvollevel = newvollevel
-                                    with open('/home/pi/.mediavolume.json', 'w') as vol:
-                                        json.dump(settingvollevel, vol)
-                                    print('Setting volume to: ' + str(settingvollevel))
-                                    vlcplayer.set_vlc_volume(int(settingvollevel))
-                            else:
-                                say("Sorry I could not help you")
+                                    changevollevel = 10
+                                newvollevel = oldvollevel - changevollevel
+                                print(newvollevel)
+                                if int(newvollevel) > 100:
+                                    settingvollevel == 100
+                                elif int(newvollevel) < 0:
+                                    settingvollevel == 0
+                                else:
+                                    settingvollevel = newvollevel
+                                with open('/home/pi/.mediavolume.json', 'w') as vol:
+                                    json.dump(settingvollevel, vol)
+                                print('Setting volume to: ' + str(settingvollevel))
+                                vlcplayer.set_vlc_volume(int(settingvollevel))
                         else:
-                            say("Sorry nothing is playing right now")
-                    if 'refresh'.lower() in str(usrcmd).lower() and 'music'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        refreshlists()
-                    if 'google music'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        vlcplayer.stop_vlc()
-                        gmusicselect(str(usrcmd).lower())
-                    if 'spotify'.lower() in str(usrcmd).lower():
-                        assistant.stop_conversation()
-                        vlcplayer.stop_vlc()
-                        spotify_playlist_select(str(usrcmd).lower())
-            if custom_wakeword:
-                self.detector.terminate()
+                            say("Sorry I could not help you")
+                    else:
+                        say("Sorry nothing is playing right now")
+                if 'refresh'.lower() in str(usrcmd).lower() and 'music'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    refreshlists()
+                if 'google music'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    vlcplayer.stop_vlc()
+                    gmusicselect(str(usrcmd).lower())
+                if 'spotify'.lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
+                    vlcplayer.stop_vlc()
+                    spotify_playlist_select(str(usrcmd).lower())
+        if custom_wakeword:
+            self.detector.terminate()
 
 
 if __name__ == '__main__':
