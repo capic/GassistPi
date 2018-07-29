@@ -313,11 +313,8 @@ class Myassistant():
     def get_best_accurate_command(commands_list, mmmcommand):
         accurates_commands = []
         for command in commands_list:
-            print(commands_list[command])
             if commands_list[command].lower() in mmmcommand:
-                print(command.lower() + " dedans")
                 accurates_commands.append(type('',(object,),{'command': command, 'accurate': SequenceMatcher(None, command.lower(), mmmcommand).ratio()})())
-        print(accurates_commands)
 
         if len(accurates_commands) > 0:
             return max(accurates_commands, key=attrgetter('accurate')).command
@@ -355,6 +352,7 @@ class Myassistant():
             else:
                 mmmcommand_accurate = self.get_best_accurate_command(magic_mirror_commands['generic']['actions'], mmmcommand)
                 if mmmcommand_accurate is not None:
+                    print(mmmcommand_accurate)
                     if magic_mirror_commands['generic']['actions']['power_off'].lower() == mmmcommand_accurate:
                         message_to_say = magic_mirror_messages['commands']['generic']['power_off'] + ' ' + \
                                          magic_mirror_messages['name']
