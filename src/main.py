@@ -100,9 +100,11 @@ led.start(0)
 
 # commands
 commands = configuration['commands']
-
 # messages
 messages = configuration['messages']
+
+mediastopbutton=True
+
 
 # Sonoff-Tasmota Declarations
 # Make sure that the device name assigned here does not overlap any of your smart device names in the google home app
@@ -164,8 +166,8 @@ class Myassistant():
         return self.interrupted
 
     def stopbutton(self):
-        while GPIO.input(23):
-            time.sleep(0.01)
+        while mediastopbutton:
+            time.sleep(0.25)
             if not GPIO.input(23):
                 print('Stopped')
                 stop()
