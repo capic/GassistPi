@@ -324,10 +324,11 @@ class Myassistant():
                             interrupt_check=self.interrupt_callback,
                             sleep_time=0.03)
 
-    def magic_mirror_treatment(self, usrcmd):
+    @staticmethod
+    def magic_mirror_treatment(usrcmd):
         magic_mirror_commands = commands['magic_mirror']
         magic_mirror_messages = messages['magic_mirror']
-        self.assistant.stop_conversation()
+
         try:
             mmmcommand = str(usrcmd).lower()
 
@@ -499,6 +500,7 @@ class Myassistant():
                         tasmota_control(str(usrcmd).lower(), name.lower(), tasmota_deviceip[num])
                         break
                 if commands['magic_mirror']['name'].lower() in str(usrcmd).lower():
+                    assistant.stop_conversation()
                     self.magic_mirror_treatment(usrcmd)
                 if 'ingredients'.lower() in str(usrcmd).lower():
                     assistant.stop_conversation()
