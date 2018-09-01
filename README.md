@@ -6,8 +6,8 @@
 
 ### **Community: For Non-Issue Help and Interaction** [![Join the chat at https://gitter.im/publiclab/publiclab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/GassistPi/Lobby/)
 *******************************************************************************************************************************
-## 28-July-2018 Update:
-**Custom wakeword for Pi Zero boards has been added. This update applies to Pi Zero and other non-Armv7 boards. Now you can activate all Pi boards by voice. Users who want custom hotword activation, start from scratch.**      
+## 23-Aug-2018 Update:
+**Added the ability to disable the default Ok-Google hotword. Changing GPIOs used has been made easy.**        
 *******************************************************************************************************************************
 
 # Features (All features are applicable to all Pi boards, unless and otherwise mentioned):  
@@ -84,13 +84,16 @@ AIY-HAT and CUSTOM-HAT users, please reboot the Pi at places mentioned, else it 
 
   3.3. USB MIC AND HDMI users,  
   ```
+  sudo chmod +x /home/pi/GassistPi/audio-drivers/USB-MIC-HDMI/scripts/configure.sh  
+  sudo /home/pi/GassistPi/audio-drivers/USB-MIC-HDMI/scripts/configure.sh  
+  sudo reboot 
   sudo chmod +x /home/pi/GassistPi/audio-drivers/USB-MIC-HDMI/scripts/install-usb-mic-hdmi.sh  
   sudo /home/pi/GassistPi/audio-drivers/USB-MIC-HDMI/scripts/install-usb-mic-hdmi.sh  
   speaker-test  
   ```
 
   3.4. USB MIC AND AUDIO JACK users,  
-  ```
+  ```  
   sudo chmod +x /home/pi/GassistPi/audio-drivers/USB-MIC-JACK/scripts/usb-mic-onboard-jack.sh  
   sudo /home/pi/GassistPi/audio-drivers/USB-MIC-JACK/scripts/usb-mic-onboard-jack.sh  
   speaker-test  
@@ -105,12 +108,6 @@ AIY-HAT and CUSTOM-HAT users, please reboot the Pi at places mentioned, else it 
   sudo /home/pi/GassistPi/audio-drivers/CUSTOM-VOICE-HAT/scripts/custom-voice-hat.sh  
   speaker-test   
   ```
-
-**Those Using HDMI/Onboard Jack, make sure to force the audio**  
-```
-sudo raspi-config  
-```
-Select advanced options, then audio and choose to force audio
 
 **Those using any other DACs or HATs install the cards as per the manufacturer's guide
  and then you can try using the USB-DAC config file after changing the hardware ids**        
@@ -218,7 +215,7 @@ Insert your Project Id and Model Id in quotes in the mentioned places
 3. For changes to take effect, you need to restart the assistant. Changing status while an instance of assistant is already running will not cause any change.  
 4. Create your custom snowboy model [here](https://snowboy.kitt.ai). Add the models to **/home/pi/GassistPi/src/resources**  directory.
 5. Change the paths to the models in the config.yaml file.  
-
+6. To disable the default **"Ok Google"** hotword, set the **Ok_Google option to "Disabled"**.  
 
 ************************************************
 ### **PLAYING SPOTIFY PLAYLIST**  
@@ -442,6 +439,17 @@ Hey Google, Set/change Music Volume to ( a number between 0 and 100)
 
 Set volume to Maximum/Minimum:  
 Hey Google, Set/change Music Volume to maximum/minimum
+
+Change Tracks:  
+Play Previous Track:  
+Hey google, play previous
+Hey google, play previous song
+Hey google, play previous track
+
+Play Next Track:  
+Hey google, play next
+Hey google, play next song
+Hey google, play next track
 
 
 ************************************************
